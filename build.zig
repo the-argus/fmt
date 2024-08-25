@@ -19,9 +19,10 @@ const headers = &[_][]const u8{
 pub fn build(b: *std.Build) !void {
     var inst_step = b.getInstallStep();
     for (headers) |header| {
+        // take headers in include/fmt and move them to the relative output header path of fmt, which should in practice be zig-out/include/fmt
         const h_step = b.addInstallHeaderFile(
-            std.fs.path.join(b.allocator, &.{ "include", "fmt", header }) catch @panic("OOM"),
-            std.fs.path.join(b.allocator, &.{ "fmt", header }) catch @panic("OOM"),
+            .{ .src_path = .{ .owner = b, .sub_path = b.pathJoin(&.{ "include", "fmt", header }) } },
+            b.pathJoin(&.{ "fmt", header }),
         );
         inst_step.dependOn(&h_step.step);
     }
